@@ -16,19 +16,20 @@ function _M:setInfo(g,n)
     _[self].num = n
     _[self].commands = {}
     _[self].distance = 0
-    _[self].isParent = false
+    _[self].time = 0
+    _[self].isCrossing = false
+end
+
+function _M:getGen()
+    return _[self].gen
+end
+
+function _M:getNum()
+    return _[self].num
 end
 
 function _M:setCommand(t,c)
     _[self].commands[t] = c
-end
-
-function _M:setDistance(d)
-    _[self].distance = d
-end
-
-function _M:setParent(b)
-    _[self].isParent = b
 end
 
 function _M:getCommand(t)
@@ -38,6 +39,34 @@ function _M:getCommand(t)
         _[self].commands[t] = command
     end
     return command
+end
+
+function _M:setDistance(d)
+    _[self].distance = d
+end
+
+function _M:getDistance()
+    return _[self].distance
+end
+
+function _M:setTime(t)
+    _[self].Time = t
+end
+
+function _M:getTime()
+    return _[self].Time
+end
+
+function _M:changeIsCrossing()
+    if _[self].isCrossing then
+        _[self].isCrossing = false
+    else 
+        _[self].isCrossing = true
+    end
+end
+
+function _M:getIsCrossing()
+    return _[self].isCrossing
 end
 
 function _M:generateCommand()
@@ -53,14 +82,6 @@ function _M:generateCommand()
     command["Down"] = math.random(0, 1) == 1
     command["Left"] = math.random(0, 1) == 1
     return command
-end
-
-function _M:showA()
-    return _[self]
-end
-
-function _M:showCommand(t)
-    return _[self].commands[t]
 end
 
 -- function _M:showPrivateTable()
