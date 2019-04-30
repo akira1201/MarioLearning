@@ -51,7 +51,7 @@ function tbl:upDateIsParent(generation,number)
 		.." SET IsParent = 1"
 		.." WHERE"
 			.." Generation = "..generation
-			.." Number = "..number
+			.." AND Number = "..number
 		..";"
     return SQL.readcommand(sql)
 end
@@ -59,8 +59,8 @@ end
 function tbl:getSingle(generation,number,seconds)
 	sql = "SELECT * FROM MarioCommand WHERE "
 		.." Generation = "..generation
-		.." Number = "..number
-		.." Time = "..seconds
+		.." AND Number = "..number
+		.." AND Time = "..seconds
 		..";"
     return SQL.readcommand(sql)
 end
@@ -68,7 +68,7 @@ end
 function tbl:getByIsParent(generation)
 	sql = "SELECT * FROM MarioCommand WHERE "
 		.." Generation = "..generation
-		.." IsParent = 1"
+		.." AND IsParent = 1"
 		..";"
     return SQL.readcommand(sql)
 end

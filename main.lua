@@ -1,18 +1,18 @@
--- import
-local db = require( 'db' )
-
--- TODO エミュレータ高速化を有効にする
--- emu.speedmode("nothrottle")
+local mario = require( 'mario' )
 
 local stateFile = "./MarioTest.State"
 
 math.randomseed(1)
 
+local parentMarioList = {}
+-- 生成したマリオの数
 local marioNumber = 0
+-- 世代あたりのマリオの数
 local numberPerGen = 5
+-- デッドライン(pixel/frame)
 local pixelPerFrame = 0.8
 
--- まだ使ってないフィールド
+-- まだ使ってない
 -- 変異する確率
 local mutationProbability = 0.1
 -- 交叉する確率
@@ -20,13 +20,7 @@ local crossProbability = 0.1
 -- 交叉範囲(sec)
 local crossRange = 5
 
-function init ()
-	db:init()
-end
-
 -- this method executs runOneGen() by Maio will goal
--- @param generation the generation of mario move
--- @param number the indivisual number of generation
 -- @return Does the run succeed, The Mario's x position
 function execute()
 	generation = 0
@@ -39,7 +33,6 @@ function execute()
 		end
 	end
 
-	writeResultCsv(db:getResult())	
 	print("============== Goal ==============")
 	print("====", "Generation : ", generation)
 	print("====", marioNumber-1, "Marios were dead")	
@@ -48,7 +41,6 @@ end
 
 -- this method executs run() for all indivisual number of a generation
 -- @param generation the generation of mario move
--- @param number the indivisual number of generation
 -- @return Does the run succeed, The Mario's x position
 function runOneGen(generation)
 	print("******** Generation : ", generation)
@@ -68,6 +60,9 @@ end
 function run(generation, number)
 	marioNumber = marioNumber +1
 	print("--- Number : ", number)
+	m = mario:new()
+	m:setInfo(generation,number)
+
 	successFlg = false
 	savestate.load(stateFile)
 	startFrame = emu.framecount()
@@ -81,12 +76,15 @@ function run(generation, number)
 			break
 		end
 		if currentFrame%60 == 0 then
-			marioCommand = generateCommands(generation,number,currentFrame/60)
+			marioCommand = getCommand(generation,number,currentFrame/60,m)
+
 		end
 		joypad.set(marioCommand, 1)
 		emu.frameadvance()
 	end
-	return successFlg, currentPosition
+
+	m:setDistance(currentPosition)
+	return successFlg, m
 end
 
 function checkFinished(currentPosition, currentFrame)
@@ -106,41 +104,10 @@ function checkFinished(currentPosition, currentFrame)
 	return false, false
 end
 
-function generateCommands(generation, number, seconds)
-	marioCommand = {}
-	marioCommand["A"] = math.random(0, 1) == 1
-	marioCommand["B"] = math.random(0, 1) == 1
-	marioCommand["X"] = math.random(0, 1) == 1
-	marioCommand["Y"] = math.random(0, 1) == 1
-	marioCommand["L"] = math.random(0, 1) == 1
-	marioCommand["R"] = math.random(0, 1) == 1
-	marioCommand["Up"] = math.random(0, 1) == 1
-	marioCommand["Right"] = math.random(0, 1) == 1
-	marioCommand["Down"] = math.random(0, 1) == 1
-	marioCommand["Left"] = math.random(0, 1) == 1
-	-- TODO ADD YOUR LOGIC
-	db:insertCommands(generation,number,currentFrame/60,marioCommand)
-	return marioCommand
+function getCommand(generation, number, seconds, m)
+	command = m:getCommand(seconds)
+	-- TODO add your logic
+	return command
 end
 
-function writeResultCsv(result)
-	-- TODO CSVデータがへんだよぉ
-	text = ""
-	print(result)
-	for k, v in pairs(result) do
-		if type(v) == "boolean" then
-			if v then
-				v = 1
-			else
-				v = 0
-			end
-		end
-		text = text..k..","..v..","
-	end
-	runningFile = io.open("runningFile.csv", "w")
-	runningFile:write(text)
-	runningFile:close()
-end
-
-init()
 execute()
